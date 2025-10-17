@@ -1,0 +1,11 @@
+Arquero_Random1,100,28,17,9,Arquero
+Guerrero_Random2,86,32,29,16,Guerrero
+Guerrero_Random3,88,26,28,8,Guerrero
+Caballero_Elite,200,60,40,8,Caballero
+Guerrero_Fuerte,210,70,54,12,Guerrero
+Lancelot,180,65,50,10,Caballero
+RobinHood,95,55,20,18,Arquero
+Conan,200,70,45,6,Guerrero
+Artemisa,100,60,25,20,Arquero
+SirGalahad,170,68,48,9,Caballero
+Ragnar,210,75,55,7,Guerrero

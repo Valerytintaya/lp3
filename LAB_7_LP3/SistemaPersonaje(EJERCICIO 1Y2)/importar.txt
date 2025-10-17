@@ -1,0 +1,6 @@
+Lancelot,180,65,50,10,Caballero
+RobinHood,95,55,20,18,Arquero
+Conan,200,70,45,6,Guerrero
+Artemisa,100,60,25,20,Arquero
+SirGalahad,170,68,48,9,Caballero
+Ragnar,210,75,55,7,Guerrero
