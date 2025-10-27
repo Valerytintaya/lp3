@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="alquilerdeautos.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="0"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="3221"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Alquileres" custom_title="0" dock_id="1" table="4,10:mainAlquileres"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011e00ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">-- ==========================================================
+-- BASE DE DATOS: alquilerdeautos.db
+-- ==========================================================
+PRAGMA foreign_keys = OFF;
+
+-- ==========================================================
+-- ELIMINACIÓN ORDENADA DE TABLAS (por dependencias)
+-- ==========================================================
+DROP TABLE IF EXISTS Pagos;
+DROP TABLE IF EXISTS Alquileres;
+DROP TABLE IF EXISTS Empleados;
+DROP TABLE IF EXISTS Clientes;
+DROP TABLE IF EXISTS Documentos_Vehiculo;
+DROP TABLE IF EXISTS Vehiculos;
+DROP TABLE IF EXISTS Sucursales;
+DROP TABLE IF EXISTS Tarifas;
+DROP TABLE IF EXISTS Tipo_Vehiculo;
+
+PRAGMA foreign_keys = ON;
+
+-- ==========================================================
+-- 1. TABLA: Tipo_Vehiculo
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Tipo_Vehiculo (
+    id_tipo INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL
+);
+
+-- ==========================================================
+-- 2. TABLA: Tarifas
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Tarifas (
+    id_tarifa INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_tipo INTEGER NOT NULL,
+    costo_por_dia REAL NOT NULL,
+    FOREIGN KEY (id_tipo) REFERENCES Tipo_Vehiculo(id_tipo)
+);
+
+-- ==========================================================
+-- 3. TABLA: Sucursales
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Sucursales (
+    id_sucursal INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    direccion TEXT NOT NULL
+);
+
+-- ==========================================================
+-- 4. TABLA: Vehiculos
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Vehiculos (
+    vehiculo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    placa TEXT NOT NULL UNIQUE,
+    marca TEXT NOT NULL,
+    modelo TEXT NOT NULL,
+    ano INTEGER NOT NULL,
+    estado INTEGER NOT NULL DEFAULT 1, -- 1 = disponible
+    id_tipo INTEGER NOT NULL,
+    num_puertas INTEGER,
+    num_asientos INTEGER,
+    id_sucursal INTEGER,
+    FOREIGN KEY (id_tipo) REFERENCES Tipo_Vehiculo(id_tipo) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (id_sucursal) REFERENCES Sucursales(id_sucursal) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- ==========================================================
+-- 5. TABLA: Documentos_Vehiculo
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Documentos_Vehiculo (
+    id_documento INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_vehiculo INTEGER NOT NULL,
+    tipo_documento TEXT NOT NULL,
+    fecha_emision TEXT NOT NULL,
+    fecha_vencimiento TEXT NOT NULL,
+    FOREIGN KEY (id_vehiculo) REFERENCES Vehiculos(vehiculo_id) ON DELETE CASCADE
+);
+
+-- ==========================================================
+-- 6. TABLA: Clientes
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Clientes (
+    cliente_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    apellido TEXT NOT NULL,
+    dni TEXT UNIQUE NOT NULL,
+    telefono TEXT,
+    correo TEXT
+);
+
+-- ==========================================================
+-- 7. TABLA: Empleados
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Empleados (
+    empleado_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    apellido TEXT NOT NULL,
+    cargo TEXT NOT NULL,
+    salario REAL NOT NULL,
+    id_sucursal INTEGER NOT NULL,
+    FOREIGN KEY (id_sucursal) REFERENCES Sucursales(id_sucursal)
+);
+
+-- ==========================================================
+-- 8. TABLA: Alquileres
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Alquileres (
+    id_alquiler INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_id INTEGER NOT NULL,
+    id_vehiculo INTEGER NOT NULL,
+    empleado_id INTEGER NOT NULL,
+    fecha_inicio TEXT NOT NULL,
+    fecha_fin TEXT NOT NULL,
+    total REAL NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES Clientes(cliente_id),
+    FOREIGN KEY (id_vehiculo) REFERENCES Vehiculos(vehiculo_id),
+    FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id)
+);
+
+-- ==========================================================
+-- 9. TABLA: Pagos
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS Pagos (
+    id_pago INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_alquiler INTEGER NOT NULL,
+    fecha_pago TEXT NOT NULL,
+    monto REAL NOT NULL,
+    metodo_pago TEXT NOT NULL,
+    FOREIGN KEY (id_alquiler) REFERENCES Alquileres(id_alquiler)
+);
+
+-- ==========================================================
+-- INSERTS DE DATOS DE PRUEBA
+-- ==========================================================
+
+-- Tipo de vehículos
+INSERT INTO Tipo_Vehiculo (nombre) VALUES
+('Sedán'), ('SUV'), ('Camioneta'), ('Motocicleta'), ('Furgoneta'),
+('Convertible'), ('Deportivo'), ('Pickup'), ('Minivan'), ('Eléctrico');
+
+-- Tarifas
+INSERT INTO Tarifas (id_tipo, costo_por_dia) VALUES
+(1, 50.00), (2, 70.00), (3, 80.00), (4, 30.00), (5, 90.00),
+(6, 100.00), (7, 150.00), (8, 120.00), (9, 110.00), (10, 60.00);
+
+-- Sucursales
+INSERT INTO Sucursales (nombre, direccion) VALUES
+('Sucursal Central', 'Av. Principal 123'),
+('Sucursal Norte', 'Calle Norte 45'),
+('Sucursal Sur', 'Av. Sur 67'),
+('Sucursal Este', 'Jr. Los Pinos 89'),
+('Sucursal Oeste', 'Av. Las Flores 321'),
+('Sucursal Playa', 'Malecón 12'),
+('Sucursal Centro', 'Plaza Mayor 5'),
+('Sucursal Aeropuerto', 'Av. Aviación 202'),
+('Sucursal Campo', 'Carretera 56'),
+('Sucursal Montaña', 'Ruta 88');
+
+-- Vehículos
+INSERT INTO Vehiculos (placa, marca, modelo, ano, estado, id_tipo, num_puertas, num_asientos, id_sucursal) VALUES
+('ABC-123', 'Toyota', 'Corolla', 2020, 1, 1, 4, 5, 1),
+('DEF-456', 'Hyundai', 'Tucson', 2019, 1, 2, 4, 5, 2),
+('GHI-789', 'Chevrolet', 'D-Max', 2021, 1, 3, 2, 5, 3),
+('JKL-012', 'Honda', 'CBR500', 2022, 1, 4, 0, 2, 4),
+('MNO-345', 'Mercedes', 'Sprinter', 2018, 1, 5, 4, 12, 5),
+('PQR-678', 'Mazda', 'MX-5', 2020, 1, 6, 2, 2, 6),
+('STU-901', 'Ferrari', 'F8', 2022, 1, 7, 2, 2, 7),
+('VWX-234', 'Ford', 'Ranger', 2019, 1, 8, 4, 5, 8),
+('YZA-567', 'Kia', 'Carnival', 2021, 1, 9, 5, 8, 9),
+('BCD-890', 'Tesla', 'Model 3', 2023, 1, 10, 4, 5, 10);
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
